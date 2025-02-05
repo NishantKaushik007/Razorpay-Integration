@@ -106,18 +106,18 @@ export default function RegisterPage() {
           />
           <input
             type="text"
-            name="mobile"
-            placeholder="Mobile Number"
-            value={form.mobile}
+            name="countryCode"
+            placeholder="Country Code"
+            value={form.countryCode}
             onChange={handleChange}
             required
             className="input"
           />
           <input
             type="text"
-            name="countryCode"
-            placeholder="Country Code"
-            value={form.countryCode}
+            name="mobile"
+            placeholder="Mobile Number"
+            value={form.mobile}
             onChange={handleChange}
             required
             className="input"
