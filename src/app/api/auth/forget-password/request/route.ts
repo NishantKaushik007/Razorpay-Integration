@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 60 * 60 * 1000);
+    const otpExpires = new Date(Date.now() + 2 * 60 * 1000);
     user.resetOtp = otp;
     user.resetOtpExpires = otpExpires;
     user.resetOtpAttempts = 0;

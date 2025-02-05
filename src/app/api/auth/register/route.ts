@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     // Hash the password and generate OTP
     const hashedPassword = await bcrypt.hash(parsed.password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 60 * 60 * 1000);
+    const otpExpires = new Date(Date.now() + 2 * 60 * 1000);
 
     // Create a new user with the username field included
     await User.create({
