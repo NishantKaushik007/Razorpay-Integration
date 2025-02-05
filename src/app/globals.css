@@ -66,7 +66,54 @@ body {
   * {
     @apply border-border;
   }
+
+  /* Background gradient on body container, not html/body */
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* New container for gradient background */
+  .background-gradient {
+    position: fixed; /* Ensures it covers the entire page */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #6b7280, #d1d5db); /* Example gradient */
+    z-index: -1; /* Keep it behind all other content */
+  }
+
+  /* Ensure HTML and body take full height but don’t clip the background */
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Still hide overflow on the content */
+  }
+
+  /* Container for your content */
+  .container {
+    max-width: 100%;
+    max-height: 100vh;
+    overflow: hidden; /* Prevent vertical overflow */
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative; /* Ensure content is above gradient */
+  }
+
+  /* Apply max-width to all inputs, buttons, etc. */
+  .input, .btn, .button, .shadow-md {
+    max-width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: var(--radius);
+  }
+
+  /* Prevent overflow on form */
+  form {
+    max-width: 100%;
+    overflow: hidden;
   }
 }

@@ -16,17 +16,25 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
-    if (res.ok) {
+      const data = await res.json();
+      
+      if (res.status === 403 && data.error === "Email not verified. Please verify your email.") {
+        router.push(`/verify-otp?email=${encodeURIComponent(form.email)}`);
+        return;
+      }
+
+      if (!res.ok) throw new Error(data.error || "Login failed");
+      
       router.push("/dashboard");
-    } else {
-      setError(data.error || "Login failed");
+    } catch (error: any) {
+      setError(error.message);
     }
   };
 
@@ -44,12 +52,10 @@ export default function LoginPage() {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-semibold text-white text-center mb-8">Sign in to Huly</h1>
+        <h1 className="text-2xl font-semibold text-white text-center mb-8">Sign in to One Portal</h1>
 
-        {/* Error message */}
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm text-zinc-400">
@@ -85,12 +91,19 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-[#6366f1] to-[#f59e0b] text-white hover:to-[#f59e0b] relative overflow-hidden h-12"
+            className="w-full bg-gradient-to-r from-[#6366f1] to-[#f59e0b] text-white relative overflow-hidden h-12 transition-all duration-1000 ease-in-out hover:from-[#f59e0b] hover:to-[#6366f1]"
           >
             <span className="relative z-10">LOG IN</span>
             <div className="absolute inset-0 bg-gradient-to-r from-[#6366f1]/50 to-[#f59e0b]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
           </Button>
         </form>
+
+        {/* Forgot Password */}
+        <div className="mt-4 text-center">
+          <Link href="/forget-password" className="text-blue-500 hover:underline">
+            Forgot Password?
+          </Link>
+        </div>
 
         {/* Divider */}
         <div className="relative my-6">
@@ -102,10 +115,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Forgot Password */}
+        {/* Sign Up Button */}
         <div className="mt-4 text-center">
-          <Link href="/forget-password" className="text-blue-500 hover:underline">
-            Forgot Password?
+          <Link href="/register" passHref>
+            <Button className="w-full bg-gradient-to-r from-[#00b5ad] via-[#1e40af] to-[#6b21a8] text-white relative overflow-hidden h-12 transition-all duration-1000 ease-in-out hover:from-[#6b21a8] hover:via-[#00b5ad] hover:to-[#1e40af]">
+              <span className="relative z-10">SIGN UP</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00b5ad]/50 via-[#1e40af]/50 to-[#6b21a8]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
+            </Button>
           </Link>
         </div>
 
@@ -118,6 +134,7 @@ export default function LoginPage() {
             Privacy policy
           </Link>
         </footer>
+
       </div>
     </div>
   );

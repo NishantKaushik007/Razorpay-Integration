@@ -36,15 +36,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 400 });
     }
 
+    // Check if email is verified
+    if (!user.verified) {
+      logger.info(`Unverified login attempt for email: ${email}`);
+      return NextResponse.json(
+        { 
+          error: "Email not verified. Please verify your email.",
+          redirect: "/verify-otp",
+          email: email 
+        },
+        { status: 403 }
+      );
+    }
+
     if (!user.subscriptionExpires || user.subscriptionExpires < new Date()) {
       logger.info(`Subscription expired for email: ${email}`);
       return NextResponse.json({ error: "Subscription expired. Please make payment." }, { status: 403 });
     }
 
-    // Generate unique device ID
     const deviceId = uuidv4();
-    
-    // Update user's current device
     user.currentDevice = deviceId;
     await user.save();
 
@@ -55,14 +65,13 @@ export async function POST(request: Request) {
     });
     logger.info(`User ${email} logged in successfully`);
 
-    // Set the token cookie with path: "/" so that it is available to all routes.
     const response = NextResponse.json({ message: "Login successful" });
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 30,
-      path: "/", // <-- Added path option
+      path: "/",
     });
     return response;
   } catch (error: any) {
