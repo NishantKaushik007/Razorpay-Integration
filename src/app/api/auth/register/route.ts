@@ -1,12 +1,20 @@
-// src/app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import { User } from "@/lib/UserModel";
 import { registerSchema } from "@/utils/validators";
 import bcrypt from "bcrypt";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Configure SMTP Transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true, // Use TLS
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function POST(request: Request) {
   try {
@@ -14,30 +22,29 @@ export async function POST(request: Request) {
     const parsed = registerSchema.parse(body);
     await dbConnect();
 
-    // Check for existing user by email, mobile, or username
+    // Check if user exists by email or mobile
     const existingUser = await User.findOne({
-      $or: [
-        { email: parsed.email },
-        { mobile: parsed.mobile },
-      ]
+      $or: [{ email: parsed.email }, { mobile: parsed.mobile }],
     });
-    
+
     if (existingUser) {
       let errorMsg = "";
       if (existingUser.email === parsed.email) {
         errorMsg = "Email already exists";
       } else if (existingUser.mobile === parsed.mobile) {
         errorMsg = "Mobile number already exists";
-      } 
+      }
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    // Hash the password and generate OTP
+    // Hash password
     const hashedPassword = await bcrypt.hash(parsed.password, 10);
+    
+    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 2 * 60 * 1000);
+    const otpExpires = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes expiry
 
-    // Create a new user with the username field included
+    // Create new user
     await User.create({
       username: parsed.username,
       email: parsed.email,
@@ -49,18 +56,21 @@ export async function POST(request: Request) {
       otpAttempts: 0,
     });
 
-    // Send the OTP via email
-    await resend.emails.send({
-      from: "no-reply@yourdomain.com",
+    // Send OTP email
+    const mailOptions = {
+      from: `"Job Lawn" <${process.env.SMTP_USER}>`,
       to: parsed.email,
       subject: "Your OTP Code",
-      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 60 minutes.</p>`
-    });
+      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 2 minutes.</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json({
-      message: "User registered. Please verify your email with the OTP sent."
+      message: "User registered. Please verify your email with the OTP sent.",
     });
   } catch (error: any) {
+    console.error("Error in registration:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

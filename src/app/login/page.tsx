@@ -52,7 +52,7 @@ export default function LoginPage() {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-semibold text-white text-center mb-8">Sign in to One Portal</h1>
+        <h1 className="text-2xl font-semibold text-white text-center mb-8">Sign in to Job Lawn</h1>
 
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
