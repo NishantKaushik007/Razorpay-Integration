@@ -25,8 +25,18 @@ export default function LoginPage() {
 
       const data = await res.json();
       
-      if (res.status === 403 && data.error === "Email not verified. Please verify your email.") {
+      // Check for email verification error
+      if (
+        res.status === 403 &&
+        data.error === "Email not verified. Please verify your email."
+      ) {
         router.push(`/verify-otp?email=${encodeURIComponent(form.email)}`);
+        return;
+      }
+
+      // Check for subscription expired error (using includes for flexibility)
+      if (res.status === 403 && data.error.includes("Subscription expired")) {
+        router.push("https://rzp.io/rzp/HA8MaWx");
         return;
       }
 
