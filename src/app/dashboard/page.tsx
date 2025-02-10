@@ -6,22 +6,28 @@ import { useRouter } from 'next/navigation';
 export default function Dashboard() {
   const router = useRouter();
 
-  // Logout handler
+  // Logout handler (manual logout only)
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login'); // Redirect after logout
   };
 
   useEffect(() => {
+    // Function to check user authentication on component mount
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/auth/session');
-        if (!response.ok) throw new Error(`Failed to fetch session: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch session: ${response.status}`);
+        }
 
         const data = await response.json();
         console.log('Session Data:', data);
 
-        if (!data.session) router.push('/login');
+        // If there is no session, redirect to login
+        if (!data.session) {
+          router.push('/login');
+        }
       } catch (error) {
         console.error('Error checking session:', error);
         router.push('/login');
@@ -30,27 +36,7 @@ export default function Dashboard() {
 
     checkAuth();
 
-    // Logout only when the page is closed (not on refresh)
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = ''; // Standard way to show a confirmation prompt
-    };
-
-    const handleUnload = async () => {
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/auth/logout', JSON.stringify({ logout: true }));
-      } else {
-        await fetch('/api/auth/logout', { method: 'POST' });
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handleUnload); // Triggers only when the tab/window is closed
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', handleUnload);
-    };
+    // Removed auto-logout on page unload events
   }, [router]);
 
   return (
