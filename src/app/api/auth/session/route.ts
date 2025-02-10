@@ -1,15 +1,15 @@
-// src/app/api/auth/session/route.ts
 import { NextResponse } from "next/server";
 import { verifyJwt } from "@/lib/jwt";
 import dbConnect from "@/lib/dbConnect";
 import { User } from "@/lib/UserModel";
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 
 export async function GET() {
   try {
     await dbConnect();
+    // Await the cookies() promise so that cookieStore is of the correct type.
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get("token")?.value;
 
     if (!token) {
       return NextResponse.json({ session: null });
@@ -32,8 +32,8 @@ export async function GET() {
           username: user.username,
           email: user.email,
           subscriptionExpires: user.subscriptionExpires,
-        }
-      }
+        },
+      },
     });
   } catch (error) {
     return NextResponse.json({ session: null });

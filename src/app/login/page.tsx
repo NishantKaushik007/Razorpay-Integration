@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -34,13 +34,18 @@ export default function LoginPage() {
         return;
       }
 
-      // Check for subscription expired error (using includes for flexibility)
+      // Check for subscription expired error
       if (res.status === 403 && data.error.includes("Subscription expired")) {
         router.push("https://rzp.io/rzp/HA8MaWx");
         return;
       }
 
       if (!res.ok) throw new Error(data.error || "Login failed");
+      
+      // If the login response includes a token, store it in localStorage.
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       
       router.push("/dashboard");
     } catch (error: any) {
@@ -144,7 +149,6 @@ export default function LoginPage() {
             Privacy policy
           </Link>
         </footer>
-
       </div>
     </div>
   );

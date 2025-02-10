@@ -1,4 +1,3 @@
-// src/lib/jwt.ts
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 const secret = process.env.JWT_SECRET as string;
@@ -9,8 +8,8 @@ export interface MyJwtPayload extends JwtPayload {
   subscriptionExpires: string; // or Date, depending on how you store it
 }
 
-export function signJwt(payload: object, expiresIn: number = 2592000) {
-  // expiresIn: 30 days in seconds (2592000)
+// Set default expiration to 1 day (86,400 seconds)
+export function signJwt(payload: object, expiresIn: number = 86400) {
   return jwt.sign(payload, secret, { expiresIn });
 }
 
