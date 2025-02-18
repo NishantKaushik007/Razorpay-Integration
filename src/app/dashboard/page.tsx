@@ -70,10 +70,14 @@ export default function Dashboard() {
   }, [handleLogout, router]);
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      {/* Other dashboard content */}
-      <button onClick={handleLogout}>Logout</button>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
+      <button 
+        onClick={handleLogout} 
+        className="px-6 py-3 rounded-md text-white bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 transition"
+      >
+        Logout
+      </button>
     </div>
   );
 }
